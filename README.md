@@ -143,3 +143,52 @@ The `openapi.json` file in the project root describes the available API endpoint
 - `PROTOCOL.md`: Observed upstream portal requests, responses, and protocol details.
 - `openapi.json`: OpenAPI specification for the implemented API.
 - `.env.example`: Example environment configuration using placeholders.
+
+
+## Assumptions
+
+- Meter identifiers follow the observed format, such as `J100000`, and are validated before forwarding requests to the upstream portal.
+- The upstream portal remains the source of truth; this service retrieves its data rather than maintaining a separate database.
+- The API preserves the upstream response structure for energy and geographic data to avoid introducing unsupported transformations.
+- Credentials are provided through environment variables and are not hardcoded into the source code.
+
+## Design Decisions and Trade-offs
+
+- **Express.js:** Chosen for its simple routing and lightweight structure, which suit a small REST API.
+- **Axios:** Used to make HTTP requests to the upstream portal and handle response data.
+- **Separate upstream client:** Portal authentication and data retrieval are isolated in `src/services/urjaClient.js`, keeping the Express routes easier to read and maintain.
+- **Input validation:** Invalid meter ID formats are rejected with HTTP 400 before making an upstream request.
+- **Upstream error handling:** Failed upstream requests return HTTP 502 rather than exposing internal error details to API consumers.
+- **Environment configuration:** Portal credentials and the server port are configured through environment variables.
+
+The current implementation prioritizes a small, understandable service over a more complex architecture. It does not yet implement a reusable authenticated session, caching, retries, or a persistent data store.
+
+## Intentionally Left Out
+
+- **Meter-list and network hierarchy endpoints:** These were not implemented because the required portal behavior and endpoints had not been sufficiently established.
+- **Caching and local indexing:** Omitted to keep the initial service simple and avoid introducing data freshness concerns.
+- **Automated tests:** Not added in the current implementation; these would be an important next step.
+- **Web frontend:** Omitted because the core requirement was a documented API service.
+- **Authentication for API consumers:** The current service is intended for local assignment evaluation and does not yet implement its own access-control mechanism.
+
+## Reflection
+
+### What assumptions did you make?
+
+I assumed the upstream portal should remain the source of truth and that the new API should expose its useful meter data without unnecessarily changing the response structure. I also assumed that validating meter IDs at the API boundary would help reject malformed requests early.
+
+### Which part was the most difficult, and how did you get unstuck?
+
+The most difficult part was reproducing the portal's authenticated requests from Node.js. Browser requests succeeded while an early programmatic request returned an authorization error. I compared the observed login and data requests, investigated the form encoding and session cookies, and adjusted the client until the API endpoints worked.
+
+### If you had another day, what would you improve?
+
+I would add automated tests for successful requests and failure cases, improve authenticated-session reuse and recovery, and expand the OpenAPI response schemas. I would also investigate the meter hierarchy and any supported bulk-data access paths.
+
+### What mistake did you make while solving this?
+
+An early version of the client did not reproduce the portal's authenticated request behavior correctly, resulting in a 403 response. I initially focused on retrieving the data before fully verifying the authentication flow. Comparing the browser and Node.js requests helped me narrow down and address the issue.
+
+### If you were reviewing your own submission, what would you criticise?
+
+The service covers the core endpoints but lacks automated tests, detailed response schemas, and robust session lifecycle handling. It also has limited coverage of the portal's broader data model because the meter-list endpoint and hierarchy have not been implemented. I would address these limitations before using the service in production.
