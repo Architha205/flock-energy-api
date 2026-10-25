@@ -1,0 +1,104 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Flock Energy API",
+    "version": "1.0.0",
+    "description": "A REST API that retrieves meter energy readings and geographic information from the Urja Meter Ops portal."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5001",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Check API health",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "API is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "service": {
+                      "type": "string",
+                      "example": "Flock Energy API"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meters/{meterId}/energy": {
+      "get": {
+        "summary": "Get energy readings for a meter",
+        "operationId": "getMeterEnergy",
+        "parameters": [
+          {
+            "name": "meterId",
+            "in": "path",
+            "required": true,
+            "description": "Meter identifier, for example J100000",
+            "schema": {
+              "type": "string",
+              "pattern": "^J\\d+$",
+              "example": "J100000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Energy readings retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid meter ID format"
+          },
+          "502": {
+            "description": "Unable to retrieve energy data from the upstream portal"
+          }
+        }
+      }
+    },
+    "/api/v1/meters/{meterId}/geo": {
+      "get": {
+        "summary": "Get geographic information for a meter",
+        "operationId": "getMeterGeo",
+        "parameters": [
+          {
+            "name": "meterId",
+            "in": "path",
+            "required": true,
+            "description": "Meter identifier, for example J100001",
+            "schema": {
+              "type": "string",
+              "pattern": "^J\\d+$",
+              "example": "J100001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Geographic coordinates retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid meter ID format"
+          },
+          "502": {
+            "description": "Unable to retrieve geographic data from the upstream portal"
+          }
+        }
+      }
+    }
+  }
+}
