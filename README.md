@@ -19,6 +19,32 @@ A Node.js and Express REST API that provides structured access to meter energy r
 - Axios
 - dotenv
 
+
+## Project Structure
+
+```text
+flock-energy-api/
+├── src/
+│   ├── app.js
+│   ├── server.js
+│   └── services/
+│       └── urjaClient.js
+├── .env.example
+├── .gitignore
+├── openapi.json
+├── package.json
+├── package-lock.json
+├── PROTOCOL.md
+└── README.md
+```
+
+- `src/app.js`: Defines API routes, validates meter IDs, and handles errors.
+- `src/server.js`: Loads environment configuration and starts the server.
+- `src/services/urjaClient.js`: Handles portal authentication and upstream API requests.
+- `openapi.json`: Documents the API specification.
+- `PROTOCOL.md`: Documents observed portal behavior and authentication.
+
+
 ## Prerequisites
 
 - Node.js and npm installed
@@ -115,6 +141,11 @@ The `openapi.json` file in the project root describes the available API endpoint
 - `200 OK`: The request succeeded.
 - `400 Bad Request`: The supplied meter ID has an invalid format.
 - `502 Bad Gateway`: The API could not retrieve data from the upstream portal.
+
+{
+  "error": "Invalid meter ID format"
+}
+
 
 ## Current Limitations
 
